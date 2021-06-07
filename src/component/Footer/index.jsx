@@ -3,6 +3,9 @@ import './Footer.css'
 
 export default class Footer extends Component {
   render() {
+      const {todos} = this.props
+      const doneCount= todos.reduce((pre,todo)=> pre+(todo.status?1:0),0)
+      console.log(doneCount)
     return (
       <div className="todo-footer">
         <label>
