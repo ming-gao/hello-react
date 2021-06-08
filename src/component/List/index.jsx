@@ -1,24 +1,27 @@
-import React, { Component } from 'react'
-import propTypes from 'prop-types'
-import Item from '../Item'
+import React, {Component} from 'react';
 import './index.css'
+class List extends Component {
 
-export default class List extends Component {
-  // 对接受的props进行限制
-  static propTypes = {
-    todos:propTypes.array.isRequired,
-    updateTodo:propTypes.func.isRequired
-  }
-  render() {
-    const {todos,updateTodo,deleteTodo}=this.props
-    return (
-      <ul className="todo-main">
-        {
-          todos.map((todo)=>{
-            return (<Item key={todo.id} {...todo} updateTodo={updateTodo} deleteTodo={deleteTodo}/>)
-          })
-        }
-      </ul>
-    )
-  }
+    render() {
+        const {users} = this.props
+        return (
+            <div className="row">
+                {
+                    users.map((userObj)=>{
+                        return (
+                            <div key={userObj.id} className="card">
+                                <a href={userObj.html_url} target="_blank">
+                                    <img src={userObj.avatar_url} style={{width: '100px'}} />
+                                </a>
+                                <p className="card-text">{userObj.login}</p>
+                            </div>
+                        )
+                    })
+                }
+
+            </div>
+        );
+    }
 }
+
+export default List;
