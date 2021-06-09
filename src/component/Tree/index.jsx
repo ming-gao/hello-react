@@ -1,18 +1,28 @@
 import React, {Component} from 'react';
+import PubSub from 'pubsub-js'
 import { TreeSelect } from 'antd';
 
 class Tree extends Component {
 
     state = {
-        value: ['0-0-0'],
+        values: []
     };
 
-    onChange = value => {
-        console.log('onChange ', value);
-        this.setState({ value });
+
+    onChange = (key) => {
+        console.log('onChange ', key);
+        this.setState({values: key});
+        PubSub.publish('checkData',key)  //消息发布
     };
+    // onSelect=(value, node)=>{
+    //     console.log(' node',node);
+    //     const {values} = this.state;
+    //     const newValues=[node,...values]
+    //     this.setState({ values:newValues });
+    //
+    // }
     render() {
-        const { SHOW_PARENT } = TreeSelect;
+        const { SHOW_CHILD } = TreeSelect;
         const treeData = [
             {
                 title: 'Node1',
@@ -49,13 +59,16 @@ class Tree extends Component {
                 ],
             },
         ];
+        // array[{value, title, children, [disabled, disableCheckbox, selectable, checkable]}]
         const tProps = {
             treeData,
             value: this.state.value,
             onChange: this.onChange,
+            onSelect:this.onSelect,
             treeCheckable: true,
-            showCheckedStrategy: SHOW_PARENT,
+            showCheckedStrategy: SHOW_CHILD,
             placeholder: 'Please select',
+            labelInValue:false,
             style: {
                 width: '100%',
             },
