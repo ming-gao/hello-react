@@ -1,80 +1,130 @@
-import React, {Component} from 'react';
+import React, {Component,useState,useEffect } from 'react';
 import PubSub from 'pubsub-js'
-import { TreeSelect } from 'antd';
+import { Tree  } from 'antd';
 
-class Tree extends Component {
+const treeData = [
+    {
+        title: '0-0',
+        key: '0-0',
+        children: [
+            {
+                title: '0-0-0',
+                key: '0-0-0',
+            },
+            {
+                title: '0-0-1',
+                key: '0-0-1',
+            },
+            {
+                title: '0-0-2',
+                key: '0-0-2',
+            },
+        ],
+    },
+    {
+        title: '0-1',
+        key: '0-1',
+        children: [
+            {
+                title: '0-1-0',
+                key: '0-1-0',
+            },
+            {
+                title: '0-1-1',
+                key: '0-1-1',
+            },
+            {
+                title: '0-1-2',
+                key: '0-1-2',
+            },
+        ],
+    },
+    {
+        title: '0-2',
+        key: '0-2',
+    },
+];
 
+class Demo extends Component {
     state = {
-        values: []
-    };
-
-
-    onChange = (key) => {
-        console.log('onChange ', key);
-        this.setState({values: key});
-        PubSub.publish('checkData',key)  //消息发布
-    };
-    // onSelect=(value, node)=>{
-    //     console.log(' node',node);
-    //     const {values} = this.state;
-    //     const newValues=[node,...values]
-    //     this.setState({ values:newValues });
-    //
-    // }
+        checkedKeys:[]
+    }
+    componentDidMount(){
+        PubSub.subscribe('deleteByKey',(_,key) =>{
+            const {checkedKeys} = this.state
+            this.setState({
+                checkedKeys: checkedKeys.filter((item) => item !== key),
+            });
+        })
+    }
     render() {
-        const { SHOW_CHILD } = TreeSelect;
-        const treeData = [
-            {
-                title: 'Node1',
-                value: '0-0',
-                key: '0-0',
-                children: [
-                    {
-                        title: 'Child Node1',
-                        value: '0-0-0',
-                        key: '0-0-0',
-                    },
-                ],
-            },
-            {
-                title: 'Node2',
-                value: '0-1',
-                key: '0-1',
-                children: [
-                    {
-                        title: 'Child Node3',
-                        value: '0-1-0',
-                        key: '0-1-0',
-                    },
-                    {
-                        title: 'Child Node4',
-                        value: '0-1-1',
-                        key: '0-1-1',
-                    },
-                    {
-                        title: 'Child Node5',
-                        value: '0-1-2',
-                        key: '0-1-2',
-                    },
-                ],
-            },
-        ];
-        // array[{value, title, children, [disabled, disableCheckbox, selectable, checkable]}]
-        const tProps = {
-            treeData,
-            value: this.state.value,
-            onChange: this.onChange,
-            onSelect:this.onSelect,
-            treeCheckable: true,
-            showCheckedStrategy: SHOW_CHILD,
-            placeholder: 'Please select',
-            labelInValue:false,
-            style: {
-                width: '100%',
-            },
-        };
-        return <TreeSelect {...tProps} />;
+        this.onCheck=(checkedKeysValue,event)=>{
+            console.log('onCheck', checkedKeysValue);
+            this.setState({checkedKeys: checkedKeysValue.checked})
+            if (event.checked){
+                PubSub.publish('checkData',event.node)
+            } else {
+                PubSub.publish('cancelCheckData',event.node)
+            }
+        }
+        return (
+            <Tree
+                checkable
+                checkStrictly={true}
+                onCheck={this.onCheck}
+                checkedKeys={this.state.checkedKeys}
+                treeData={treeData}
+            />
+        );
     }
 }
 
-export default Tree;
+// const Demo = () => {
+//     const onCheck = (checkedKeysValue,event) => {
+//         console.log('onCheck', event);
+//         setCheckedKeys(checkedKeysValue);
+//         if (event.checked){
+//             PubSub.publish('checkData',event.node)
+//         } else {
+//             PubSub.publish('cancelCheckData',event.node)
+//         }
+//     };
+//
+//     // const onSelect = (selectedKeysValue, info) => {
+//     //     console.log('onSelect', info);
+//     //     setSelectedKeys(selectedKeysValue);
+//     // };
+// };
+
+export default Demo
+
+// class demoTree extends Component {
+//
+//     state = {
+//         values: []
+//     };
+//
+//
+//     // onChange = (key) => {
+//     //     console.log('onChange ', key);
+//     //     this.setState({values: key});
+//     //     PubSub.publish('checkData',key)  //消息发布
+//     // };
+//     onSelect=(value, node)=>{
+//         console.log(' node',node);
+//         const {values} = this.state;
+//         const newValues=[node,...values]
+//         this.setState({ values:newValues });
+//         PubSub.publish('checkData',node)  //消息发布
+//
+//     }
+//     render() {
+//         return (
+//             <div>
+//
+//             </div>
+//         )
+//
+//     }
+// }
+

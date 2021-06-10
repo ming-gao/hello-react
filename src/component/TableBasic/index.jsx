@@ -1,28 +1,7 @@
 import React, {Component} from 'react';
 import PubSub from 'pubsub-js'
-import {Table, Button,Space } from 'antd';
+import {Table, Button, Space, Popconfirm} from 'antd';
 import 'antd/dist/antd.css'
-
-const columns = [
-    {
-        title: 'Name',
-        dataIndex: 'label',
-    },
-    {
-        title: 'Value',
-        dataIndex: 'value',
-    },
-    {
-        title: 'Action',
-        key: 'action',
-        render: (text, record) => (
-            <Space size="middle">
-                <a>Invite {record.name}</a>
-                <a onClick={(c)=>this.delete}>Delete</a>
-            </Space>
-        ),
-    },
-];
 
 const tableData = [];
 for (let i = 0; i < 10; i++) {
@@ -33,29 +12,65 @@ for (let i = 0; i < 10; i++) {
             value: i + j,
         });
     }
-
 }
 
 export default class TableBasic extends Component {
-    state = {
-        selectedRowKeys: [], // Check here to configure the default column
-        loading: false,
-        treeData: []
-    };
+    constructor(props) {
+        super(props);
+        this.columns = [
+            {
+                title: 'Name',
+                dataIndex: 'label',
+            },
+            {
+                title: 'Value',
+                dataIndex: 'value',
+            },
+            {
+                title: 'Action',
+                key: 'action',
+                render: (_, record) =>
+                    this.state.treeData.length >= 1 ? (
+                        <Popconfirm title="Sure to delete?" onConfirm={() => this.handleDelete(record.key)}>
+                            <a>Delete</a>
+                        </Popconfirm>
+                    ) : null,
+            },
+        ];
+        this.state = {
+            selectedRowKeys: [], // Check here to configure the default column
+            loading: false,
+            treeData: []
+        };
+    }
 
+    handleDelete = (key) => {
+        console.log(key)
+        PubSub.publish('deleteByKey',key)
+        const {treeData} = this.state;
+        this.setState({
+            treeData: treeData.filter((item) => item.key !== key),
+        });
+    };
     componentDidMount() {
-        //消息订阅
+        //消息订阅,添加数据到表格
         PubSub.subscribe('checkData', (_, data) => {
             console.log('接收数据key', data)
-
-            // console.log(this.state.tableData.value)
-            const newTableData = tableData.filter(list => {
-                return list.key === data[data.length - 1]
+            const tempData = tableData.filter(list => {
+                return list.key === data.key
             })
+            const newTableData = [tempData[0], ...this.state.treeData]
+            console.log(newTableData, tempData)
             this.setState({treeData: newTableData});
-            console.log('过滤后', newTableData)
         })
-
+        PubSub.subscribe('cancelCheckData', (_, data) => {
+            console.log(data)
+            const {treeData} = this.state
+            const newTrees = treeData.filter(tree => {
+                return tree.key !== data.key
+            })
+            this.setState({treeData: newTrees})
+        })
     }
 
     componentWillUnmount() {
@@ -95,7 +110,7 @@ export default class TableBasic extends Component {
                         {hasSelected ? `Selected ${selectedRowKeys.length} items` : ''}
                     </span>
                 </div>
-                <Table rowSelection={rowSelection} columns={columns} dataSource={treeData}/>
+                <Table rowSelection={rowSelection} columns={this.columns} dataSource={treeData}/>
             </div>
         );
     }
