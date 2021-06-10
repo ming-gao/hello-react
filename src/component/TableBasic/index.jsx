@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PubSub from 'pubsub-js'
-import {Table, Button, Space, Popconfirm} from 'antd';
+import {Button, Popconfirm, Table} from 'antd';
 import 'antd/dist/antd.css'
 
 const tableData = [];
@@ -76,16 +76,31 @@ export default class TableBasic extends Component {
     componentWillUnmount() {
         PubSub.unsubscribe('checkData')
     }
+    //批量删除
+    bantchDelete (taskList,deleteTaskIds){
+        for (let i=0; i<taskList.length;){
+            let task = taskList[i];
+            //根据key删除
+            if (deleteTaskIds.indexOf(task.key)!==-1) {
+                taskList.splice(i,1);
+                continue;
+            }
+            i++;
+        }
+        return taskList
+    };
 
-    start = () => {
-        this.setState({loading: true});
-        // ajax request after empty completing
-        setTimeout(() => {
-            this.setState({
-                selectedRowKeys: [],
-                loading: false,
-            });
-        }, 1000);
+    handleDeleteAll = () => {
+
+        const {selectedRowKeys, treeData} = this.state
+        console.log(selectedRowKeys)
+        const temp = this.bantchDelete(treeData,selectedRowKeys)
+        this.setState({treeData:temp})
+        const q=  temp.filter(item => {
+            return item.key
+        })
+        console.log(q)
+        PubSub.publish('')
     };
 
     onSelectChange = selectedRowKeys => {
@@ -103,8 +118,8 @@ export default class TableBasic extends Component {
         return (
             <div>
                 <div style={{marginBottom: 16}}>
-                    <Button type="primary" onClick={this.start} disabled={!hasSelected} loading={loading}>
-                        Reload
+                    <Button type="dashed" danger onClick={this.handleDeleteAll} disabled={!hasSelected} loading={loading}>
+                        删除
                     </Button>
                     <span style={{marginLeft: 8}}>
                         {hasSelected ? `Selected ${selectedRowKeys.length} items` : ''}
