@@ -3,6 +3,7 @@ import PubSub from 'pubsub-js'
 import {Button, Popconfirm, Table} from 'antd';
 import 'antd/dist/antd.css'
 
+
 const tableData = [];
 for (let i = 0; i < 10; i++) {
     for (let j = 0; j < 10; j++) {
@@ -19,31 +20,31 @@ export default class TableBasic extends Component {
         super(props);
         this.columns = [
             {
-                title: 'Name',
+                title: '名称',
                 dataIndex: 'label',
             },
             {
-                title: 'Value',
+                title: '数值',
                 dataIndex: 'value',
             },
             {
-                title: 'Action',
+                title: '动作',
                 key: 'action',
                 render: (_, record) =>
                     this.state.treeData.length >= 1 ? (
-                        <Popconfirm title="Sure to delete?" onConfirm={() => this.handleDelete(record.key)}>
-                            <a>Delete</a>
+                        <Popconfirm title="确认删除?" okText="是" cancelText="否" onConfirm={() => this.handleDelete(record.key)}>
+                            <a>删除</a>
                         </Popconfirm>
                     ) : null,
             },
         ];
         this.state = {
-            selectedRowKeys: [], // Check here to configure the default column
+            selectedRowKeys: [],
             loading: false,
             treeData: []
         };
     }
-
+    // 删除按钮功能
     handleDelete = (key) => {
         console.log(key)
         PubSub.publish('deleteByKey',key)
@@ -55,7 +56,7 @@ export default class TableBasic extends Component {
     componentDidMount() {
         //消息订阅,添加数据到表格
         PubSub.subscribe('checkData', (_, data) => {
-            console.log('接收数据key', data)
+            console.log('接收key', data)
             const tempData = tableData.filter(list => {
                 return list.key === data.key
             })
@@ -63,6 +64,7 @@ export default class TableBasic extends Component {
             console.log(newTableData, tempData)
             this.setState({treeData: newTableData});
         })
+        // 取消勾选的key值
         PubSub.subscribe('cancelCheckData', (_, data) => {
             console.log(data)
             const {treeData} = this.state
@@ -74,6 +76,7 @@ export default class TableBasic extends Component {
     }
 
     componentWillUnmount() {
+        // 解除订阅
         PubSub.unsubscribe('checkData')
     }
     //批量删除
@@ -89,14 +92,18 @@ export default class TableBasic extends Component {
         }
         return taskList
     };
-
+    //删除多选
     handleDeleteAll = () => {
-
         const {selectedRowKeys, treeData} = this.state
         console.log(selectedRowKeys)
         const temp = this.bantchDelete(treeData,selectedRowKeys)
+        this.setState((prevState)=>{
+            delete prevState.treeData
+            return prevState
+        })
         this.setState({treeData:temp})
-        const q=  temp.filter(item => {
+        //拿出key传给Tree组件
+        const q =  temp.filter(item => {
             return item.key
         })
         console.log(q)
