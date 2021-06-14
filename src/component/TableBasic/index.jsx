@@ -44,15 +44,7 @@ export default class TableBasic extends Component {
             treeData: []
         };
     }
-    // 删除按钮功能
-    handleDelete = (key) => {
-        console.log(key)
-        PubSub.publish('deleteByKey',key)
-        const {treeData} = this.state;
-        this.setState({
-            treeData: treeData.filter((item) => item.key !== key),
-        });
-    };
+
     componentDidMount() {
         //消息订阅,添加数据到表格
         PubSub.subscribe('checkData', (_, data) => {
@@ -92,22 +84,29 @@ export default class TableBasic extends Component {
         }
         return taskList
     };
+    // 删除单个
+    handleDelete = (key) => {
+        console.log(key)
+        PubSub.publish('deleteByKey',key)
+        const {treeData} = this.state;
+        this.setState({
+            treeData: treeData.filter((item) => item.key !== key),
+        });
+    };
     //删除多选
-    handleDeleteAll = () => {
-        const {selectedRowKeys, treeData} = this.state
+    handleDeleteAll = async () => {
+        const {selectedRowKeys} = this.state
+        let treeData = [...this.state.treeData]
         console.log(selectedRowKeys)
-        const temp = this.bantchDelete(treeData,selectedRowKeys)
-        this.setState((prevState)=>{
-            delete prevState.treeData
-            return prevState
+        await this.setState(()=>{
+            return {treeData: this.bantchDelete(treeData,selectedRowKeys)}
         })
-        this.setState({treeData:temp})
-        //拿出key传给Tree组件
-        const q =  temp.filter(item => {
-            return item.key
+        await console.log('104 rows',this.state.treeData)
+        let selectedKeys = treeData.map(item => {
+            return item.key;
         })
-        console.log(q)
-        PubSub.publish('')
+        // console.log(selectedKeys)
+        PubSub.publish('deleteByRowKeys',selectedKeys)
     };
 
     onSelectChange = selectedRowKeys => {
@@ -116,6 +115,7 @@ export default class TableBasic extends Component {
     };
 
     render() {
+        console.log('render')
         const {loading, selectedRowKeys, treeData} = this.state;
         const rowSelection = {
             selectedRowKeys,

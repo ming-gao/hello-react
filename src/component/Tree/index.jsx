@@ -1,4 +1,4 @@
-import React, {Component,useState,useEffect } from 'react';
+import React, {Component } from 'react';
 import PubSub from 'pubsub-js'
 import { Tree  } from 'antd';
 
@@ -56,6 +56,10 @@ class Demo extends Component {
                 checkedKeys: checkedKeys.filter((item) => item !== key),
             });
         })
+        PubSub.subscribe('deleteByRowKeys',(_,keys)=>{
+            console.log(keys)
+            this.setState({checkedKeys:keys})
+        })
     }
     render() {
         this.onCheck=(checkedKeysValue,event)=>{
@@ -79,52 +83,5 @@ class Demo extends Component {
     }
 }
 
-// const Demo = () => {
-//     const onCheck = (checkedKeysValue,event) => {
-//         console.log('onCheck', event);
-//         setCheckedKeys(checkedKeysValue);
-//         if (event.checked){
-//             PubSub.publish('checkData',event.node)
-//         } else {
-//             PubSub.publish('cancelCheckData',event.node)
-//         }
-//     };
-//
-//     // const onSelect = (selectedKeysValue, info) => {
-//     //     console.log('onSelect', info);
-//     //     setSelectedKeys(selectedKeysValue);
-//     // };
-// };
-
 export default Demo
-
-// class demoTree extends Component {
-//
-//     state = {
-//         values: []
-//     };
-//
-//
-//     // onChange = (key) => {
-//     //     console.log('onChange ', key);
-//     //     this.setState({values: key});
-//     //     PubSub.publish('checkData',key)  //消息发布
-//     // };
-//     onSelect=(value, node)=>{
-//         console.log(' node',node);
-//         const {values} = this.state;
-//         const newValues=[node,...values]
-//         this.setState({ values:newValues });
-//         PubSub.publish('checkData',node)  //消息发布
-//
-//     }
-//     render() {
-//         return (
-//             <div>
-//
-//             </div>
-//         )
-//
-//     }
-// }
 
