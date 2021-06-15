@@ -52,9 +52,9 @@ export default class TableBasic extends Component {
             const tempData = tableData.filter(list => {
                 return list.key === data.key
             })
-            const newTableData = [tempData[0], ...this.state.treeData]
-            console.log(newTableData, tempData)
-            this.setState({treeData: newTableData});
+            let treeData = [...this.state.treeData]
+            treeData.push(tempData[0])
+            this.setState({treeData: treeData});
         })
         // 取消勾选的key值
         PubSub.subscribe('cancelCheckData', (_, data) => {
@@ -97,16 +97,15 @@ export default class TableBasic extends Component {
     handleDeleteAll = async () => {
         const {selectedRowKeys} = this.state
         let treeData = [...this.state.treeData]
-        console.log(selectedRowKeys)
         await this.setState(()=>{
             return {treeData: this.bantchDelete(treeData,selectedRowKeys)}
         })
-        await console.log('104 rows',this.state.treeData)
         let selectedKeys = treeData.map(item => {
             return item.key;
         })
         // console.log(selectedKeys)
         PubSub.publish('deleteByRowKeys',selectedKeys)
+        this.setState({selectedRowKeys:[]})
     };
 
     onSelectChange = selectedRowKeys => {
@@ -115,7 +114,6 @@ export default class TableBasic extends Component {
     };
 
     render() {
-        console.log('render')
         const {loading, selectedRowKeys, treeData} = this.state;
         const rowSelection = {
             selectedRowKeys,
@@ -129,10 +127,10 @@ export default class TableBasic extends Component {
                         删除
                     </Button>
                     <span style={{marginLeft: 8}}>
-                        {hasSelected ? `Selected ${selectedRowKeys.length} items` : ''}
+                        {hasSelected ? `选择了 ${selectedRowKeys.length} 项` : ''}
                     </span>
                 </div>
-                <Table rowSelection={rowSelection} columns={this.columns} dataSource={treeData}/>
+                <Table rowSelection={rowSelection} columns={this.columns} showLine={true} dataSource={treeData}/>
             </div>
         );
     }
