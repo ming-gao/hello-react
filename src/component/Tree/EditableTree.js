@@ -24,8 +24,7 @@ class EditableTree extends Component {
     };
 
     componentDidMount() {
-        // Tip: Must have, or the parent node will not expand automatically when you first add a child node
-        this.onExpand([]); // 手动触发，否则会遇到第一次添加子节点不展开的Bug
+        this.onExpand([]); // 手动触发
     }
 
     onCheck = (checkedKeysValue, event) => {
@@ -62,8 +61,8 @@ class EditableTree extends Component {
                         {item.value}
                     </span>
                     <span className={styles.operationField}>
-                        <EditOutlined style={{marginLeft: 10}} type='edit' onClick={() => this.onEdit(item.key)}/>
-                        <PlusOutlined style={{marginLeft: 10}} type='plus' onClick={() => this.onAdd(item.key)}/>
+                        <EditOutlined style={{marginLeft: 10}} onClick={() => this.onEdit(item.key)}/>
+                        <PlusOutlined style={{marginLeft: 10}} onClick={() => this.onAdd(item.key)}/>
                         {item.parentKey === '0' ? null : (
                             <MinusOutlined style={{marginLeft: 10}} onClick={() => this.onDelete(item.key)}/>)}
                     </span>
@@ -134,7 +133,7 @@ class EditableTree extends Component {
         }
         if (item.children) {
             console.log('key值不相等，需要切换到正确的节点上再进行添加-->',key)
-            this.addNode(key, item.children) //
+            this.addNode(key, item.children)
         }
     })
 
@@ -171,8 +170,7 @@ class EditableTree extends Component {
         } else {
             item.isEditable = false;
         }
-        //Tip: Must have, when a node is editable, and you click a button to make other node editable, the node which you don't save yet will be not editable, and its value should be defaultValue
-        item.value = item.defaultValue; // 当某节点处于编辑状态，并改变数据，点击编辑其他节点时，此节点变成不可编辑状态，value 需要回退到 defaultvalue
+        item.value = item.defaultValue;
         if (item.children) {
             this.editNode(key, item.children)
         }
