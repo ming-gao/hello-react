@@ -14,6 +14,17 @@ for (let i = 0; i < 10; i++) {
         });
     }
 }
+for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+        for (let k = 0; k < 10; k++){
+            tableData.push({
+                key: `0-${i}-${j}-${k}`,
+                label: `Edward King ${i} - ${j}`,
+                value: i + j,
+            });
+        }
+    }
+}
 
 export default class TableBasic extends Component {
     constructor(props) {
@@ -32,7 +43,8 @@ export default class TableBasic extends Component {
                 key: 'action',
                 render: (_, record) =>
                     this.state.treeData.length >= 1 ? (
-                        <Popconfirm title="确认删除?" okText="是" cancelText="否" onConfirm={() => this.handleDelete(record.key)}>
+                        <Popconfirm title="确认删除?" okText="是" cancelText="否"
+                                    onConfirm={() => this.handleDelete(record.key)}>
                             <a>删除</a>
                         </Popconfirm>
                     ) : null,
@@ -71,23 +83,25 @@ export default class TableBasic extends Component {
         // 解除订阅
         PubSub.unsubscribe('checkData')
     }
+
     //批量删除
-    bantchDelete (taskList,deleteTaskIds){
-        for (let i=0; i<taskList.length;){
+    bantchDelete(taskList, deleteTaskIds) {
+        for (let i = 0; i < taskList.length;) {
             let task = taskList[i];
             //根据key删除
-            if (deleteTaskIds.indexOf(task.key)!==-1) {
-                taskList.splice(i,1);
+            if (deleteTaskIds.indexOf(task.key) !== -1) {
+                taskList.splice(i, 1);
                 continue;
             }
             i++;
         }
         return taskList
     };
+
     // 删除单个
     handleDelete = (key) => {
         console.log(key)
-        PubSub.publish('deleteByKey',key)
+        PubSub.publish('deleteByKey', key)
         const {treeData} = this.state;
         this.setState({
             treeData: treeData.filter((item) => item.key !== key),
@@ -97,15 +111,15 @@ export default class TableBasic extends Component {
     handleDeleteAll = async () => {
         const {selectedRowKeys} = this.state
         let treeData = [...this.state.treeData]
-        await this.setState(()=>{
-            return {treeData: this.bantchDelete(treeData,selectedRowKeys)}
+        await this.setState(() => {
+            return {treeData: this.bantchDelete(treeData, selectedRowKeys)}
         })
         let selectedKeys = treeData.map(item => {
             return item.key;
         })
         // console.log(selectedKeys)
-        PubSub.publish('deleteByRowKeys',selectedKeys)
-        this.setState({selectedRowKeys:[]})
+        PubSub.publish('deleteByRowKeys', selectedKeys)
+        this.setState({selectedRowKeys: []})
     };
 
     onSelectChange = selectedRowKeys => {
@@ -123,7 +137,8 @@ export default class TableBasic extends Component {
         return (
             <div>
                 <div style={{marginBottom: 16}}>
-                    <Button type="dashed" danger onClick={this.handleDeleteAll} disabled={!hasSelected} loading={loading}>
+                    <Button type="dashed" danger onClick={this.handleDeleteAll} disabled={!hasSelected}
+                            loading={loading}>
                         删除
                     </Button>
                     <span style={{marginLeft: 8}}>
